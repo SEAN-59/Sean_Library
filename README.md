@@ -4,9 +4,12 @@
 ## Name: Sean   
 ### Email: ksg3452@gmail.com
 ---
-<div align="center">
-#### 📚 **Tech Stack**
+ #### 📚 **Tech Stack** <br>
+
+<!-- <div align="center"> -->
+
 ✨ Platforms & Languages ✨
 
-    <img src="https://img.shields.io/badge/Swift-F05138?style=flat&logo=Swift&logoColor=white">
-</div>
+<img src="https://img.shields.io/badge/Swift-F05138?style=flat&logo=Swift&logoColor=white">
+
+<!-- </div> -->
