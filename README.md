@@ -5,5 +5,5 @@
 ## Email: ksg3452@gmail.com
 ---
 <div align="center">
-    <img src="https://img.shields.io/badge/Swift-#F05138?style=flat&logo=Swift&logoColor=white">
+    <img src="https://img.shields.io/badge/Swift-F05138?style=flat&logo=Swift&logoColor=white">
 </div>
