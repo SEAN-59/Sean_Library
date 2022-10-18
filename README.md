@@ -15,6 +15,8 @@
 <img src="https://img.shields.io/badge/Arduino-00979D?style=flat&logo=Arduino&logoColor=white">
 <img src="https://img.shields.io/badge/Python-3776AB?style=flat&logo=Python&logoColor=white">
 
+</div>
+
 🍀 Swift Skill 🍀 <br>
 |**Available**|**Studying**|
 |:-------:|:------:|
@@ -32,4 +34,4 @@
 📦 Preparing 📦 
 - Flutter
 
-</div>
+<!-- </div> -->
