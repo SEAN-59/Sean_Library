@@ -17,12 +17,13 @@
 
 🍀 Swift Skill 🍀
 |Available|Studying|
-|---|:---:|---:\
+|:---:|:---:|:---:|
 |UIKit|RxSwift||
 |SnapKit|Socket||
 |alamofire|||
 |Realm|||
 |FireBase|||
+
 
 📖 Studying 📖
 - RxSwift
