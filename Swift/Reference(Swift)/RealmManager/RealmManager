@@ -1,0 +1,119 @@
+//
+//  RealmManager.swift
+//  HelpToLREA
+//
+//  Created by Sean Kim on 2022/08/07.
+//
+//
+import Foundation
+import RealmSwift
+
+class RealmManager {
+    private var realm: Realm
+    static let sharedInstance = RealmManager()
+    
+    private init() {
+        realm = try! Realm()
+    }
+    
+    func defaultRealm() {
+        guard let realm = try? Realm() else { return }
+        print(realm.configuration.fileURL!)
+    } // Realm 저장 위치 확인
+    
+    func readData(object: Object, key: String) -> Object {
+        let objectType = type(of: object)
+        guard let readData = realm.object(ofType: objectType.self, forPrimaryKey: key) else {
+            let errorObject = ErrorObject()
+            return errorObject
+        }
+        return readData
+    }
+    
+    func readAllDataCount(object: Object) -> Int {
+        let objectType = type(of: object)
+        let readData = realm.objects(objectType.self)
+//        guard let choiceData = readData[1] as? SearchAddressData else { return 0}
+//        print(type(of: readData))
+//        print("\(readData[1])")
+//        print(choiceData.roadAddress)
+        return readData.count
+    }
+    
+    func readCellData(_ number: Int) -> [String] {
+        var outputArray = [String]()
+        let choiceAddr = realm.objects(SearchAddressData.self)[number].roadAddress
+        guard let InputAddr = realm.object(ofType: InputAddressData.self, forPrimaryKey: choiceAddr) else { return ["ERROR"] }
+        guard let InvestData = realm.object(ofType: InvestmentData.self, forPrimaryKey: choiceAddr) else { return ["ERROR"] }
+        
+        outputArray.append(choiceAddr)
+        outputArray.append(InputAddr.address)
+        outputArray.append("\(Int(InvestData.sellValue))")
+        outputArray.append("\(Int(InvestData.realInvest))")
+        outputArray.append("\(Int(InvestData.resultMonth))")
+        outputArray.append("\(InvestData.investRatio)")
+
+        return outputArray
+        
+    }
+    
+    func inquiryData(object: Object, key: String) -> Results<Object> {
+        let objectType = type(of: object)
+        let array = realm.objects(objectType.self).sorted(byKeyPath: "\(key)",ascending: true)
+        return array
+    }
+    
+    func create(object: Object, shouldUpdate: Bool = true){
+        try! realm.write {
+            if shouldUpdate {
+                realm.add(object, update: .all)
+            } else {
+                realm.add(object)
+            }
+        }
+    }
+    
+    func update(action: () -> Void) {
+        try! realm.write {
+            action()
+        }
+    }
+    
+    func deleteAll() {
+        try! realm.write({
+            realm.deleteAll()
+        })
+    }
+    
+    func deleteOneClass(object: Object) {
+        let objectType = type(of: object)
+        try! realm.write({
+            realm.delete(realm.objects(objectType.self))
+        })
+    }
+    
+    func deleteThing(object: Object, name: String, key: String){
+        let objectType = type(of: object)
+        try! realm.write({
+            let key = NSPredicate(format: "\(name) = %@", key)
+            realm.delete(realm.objects(objectType.self).filter(key))
+        })
+    }
+    
+    func cleanDelete() {
+        let realmURL = Realm.Configuration.defaultConfiguration.fileURL!
+        let realmURLs = [
+            realmURL,
+            realmURL.appendingPathExtension("lock"),
+            realmURL.appendingPathExtension("note"),
+            realmURL.appendingPathExtension("management")]
+        for URL in realmURLs {
+            do {
+                try FileManager.default.removeItem(at: URL)
+            } catch {
+//                handler ERROR
+            }
+        }
+    }
+    
+}
