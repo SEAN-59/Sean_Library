@@ -1,0 +1,25 @@
+# TextView text input
+
+- Content Type : 키보드 위에 보여주는 추천란이 여기서 지정해둔 유형으로 변경이 됨
+- ~~Capitalization : 대문자와 관련됨 → 안쓸듯~~
+- ~~Correction : 자동수정과 관련됨 → 안쓸듯~~
+- ~~Smart Dashes : “-” 이거 표시가 여러개 쓰면 붙어 나오는지 안붙는지 정해줄 수 있음 → 안쓸듯~~
+- ~~Smart Insert : 붙여넣기를 하게 되면 앞쪽에 빈 공간과 관련 → 안쓸듯~~
+- ~~Smart Quotes : 키보드의 스마트 구두점과 관련 → 안쓸듯~~
+- ~~Spell Checking : 맞춤법 검사 → 안쓸듯~~
+- Keyboard Type : 입력 되는 키보드의 유형 설정 → 근데 숫자만 나오게 하는거 이거 아이패드에서는 안된다?
+    - ASCII Capable : 아스키 문자만 표시해줌 → 영어만 쌉가능
+    - Numbers and Punctuation : 숫자 + 특수문자
+    - URL : 기본 타이핑 지역에 “. / .com” 같은게 있음
+    - Number Pad : 0 ... 9 까지 있는 키패드
+    - Phone Pad : 0 ... 9 부터 +*# 이 있음
+    - Name Phone Pad : 기본 키보드에서 숫자로 변경하는거 누르면 Number Pad 로 바뀜
+    - E-mail Address : E-mail 쓰기 좋게 됨
+    - Decimal Pad : 0 ... 9 에 . 이 있음
+    - Twitter
+    - Web Search : 기본 키보드에서 Return  버튼이 이동으로 바뀜
+    - ASCII Capable Number Pad
+- Keyboard Look : 키보드의 색상 바꿔줌
+- Return Key : 리턴 키를 바꿔 줌
+- Auto-enable Return Key : 안에 내용이 없으면 리턴키가 활성화 안됨
+- Secure Text Entry: 암호화와 관련됨 → 복사가 안되게 하거나 비밀번호 표시처럼 *** 로 표시됨
