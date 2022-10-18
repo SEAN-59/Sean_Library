@@ -17,7 +17,7 @@
 
 🍀 Swift Skill 🍀 <br>
 |Available|Studying|
-|:---:|:---:|
+|:-------:|:------:|
 |UIKit|RxSwift|
 |SnapKit|Socket|
 |alamofire||
