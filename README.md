@@ -15,21 +15,15 @@
 <img src="https://img.shields.io/badge/Arduino-00979D?style=flat&logo=Arduino&logoColor=white">
 <img src="https://img.shields.io/badge/Python-3776AB?style=flat&logo=Python&logoColor=white">
 
-🍀 Swift Skill 🍀   
+🍀 Swift Skill 🍀  
 |💡 Available 💡|📖 Studying 📖|
-|:-------------:|:------------:|
-|UIKit|RxSwift|
-|SnapKit|Socket|
-|alamofire||
-|Realm||
-|FireBase||
+|:-------------:|:-------------:|
+UIKit|Naver Service
+SnapKit|FireBase
+Alamofire|RxSwift
+Realm
 
-
-📖 Studying 📖
-- RxSwift
-- Socket
-
-📦 Preparing 📦 
-- Flutter
+📦 Another preparation 📦  
+Flutter
 
 </div>
