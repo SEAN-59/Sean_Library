@@ -1,4 +1,6 @@
-# Closure
+# Closure 관련
+
+### Closure 설명
 
 ```swift
 let testClosure (name: String, handler: { check: Bool in 
@@ -18,7 +20,9 @@ let testClosure (name: String, handler: { (first: Int, sedond: Int) -> check: Bo
 - 함수와 다를게 없다는건 결국 위에처럼 해도 동작 한다는 소리고 해석 방식도 다를게 없음을 의미함
 - 만약 따로 반환해줄게 없다거나 하는 경우 그냥 _ :  로 퉁쳐도 됨
 
-# Escaping Closure
+---
+
+### Escaping Closure
 
 ```swift
 class SomeClass {

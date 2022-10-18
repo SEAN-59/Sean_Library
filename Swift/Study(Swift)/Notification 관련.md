@@ -1,3 +1,5 @@
+# Notification 관련
+
 - 연결 관계가 없는 각 뷰 간에 데이터 이동과 관련된 기능
 - 등록
     - NotificationCenter.default.addObserver(_: ,selector: ,name: ,object:) 으로 등록을 하게 될 경우 name 의 이름으로 selector 의 동작을 행하는 observer가 등록이 됨
