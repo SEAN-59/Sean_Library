@@ -1,11 +1,4 @@
-//
-//  RealmManager.swift
-//  HelpToLREA
-//
-//  Created by Sean Kim on 2022/08/07.
-//
-//
-import Foundation
+import Foundation 
 import RealmSwift
 
 class RealmManager {
@@ -21,48 +14,6 @@ class RealmManager {
         print(realm.configuration.fileURL!)
     } // Realm 저장 위치 확인
     
-    func readData(object: Object, key: String) -> Object {
-        let objectType = type(of: object)
-        guard let readData = realm.object(ofType: objectType.self, forPrimaryKey: key) else {
-            let errorObject = ErrorObject()
-            return errorObject
-        }
-        return readData
-    }
-    
-    func readAllDataCount(object: Object) -> Int {
-        let objectType = type(of: object)
-        let readData = realm.objects(objectType.self)
-//        guard let choiceData = readData[1] as? SearchAddressData else { return 0}
-//        print(type(of: readData))
-//        print("\(readData[1])")
-//        print(choiceData.roadAddress)
-        return readData.count
-    }
-    
-    func readCellData(_ number: Int) -> [String] {
-        var outputArray = [String]()
-        let choiceAddr = realm.objects(SearchAddressData.self)[number].roadAddress
-        guard let InputAddr = realm.object(ofType: InputAddressData.self, forPrimaryKey: choiceAddr) else { return ["ERROR"] }
-        guard let InvestData = realm.object(ofType: InvestmentData.self, forPrimaryKey: choiceAddr) else { return ["ERROR"] }
-        
-        outputArray.append(choiceAddr)
-        outputArray.append(InputAddr.address)
-        outputArray.append("\(Int(InvestData.sellValue))")
-        outputArray.append("\(Int(InvestData.realInvest))")
-        outputArray.append("\(Int(InvestData.resultMonth))")
-        outputArray.append("\(InvestData.investRatio)")
-
-        return outputArray
-        
-    }
-    
-    func inquiryData(object: Object, key: String) -> Results<Object> {
-        let objectType = type(of: object)
-        let array = realm.objects(objectType.self).sorted(byKeyPath: "\(key)",ascending: true)
-        return array
-    }
-    
     func create(object: Object, shouldUpdate: Bool = true){
         try! realm.write {
             if shouldUpdate {
@@ -71,6 +22,15 @@ class RealmManager {
                 realm.add(object)
             }
         }
+    }
+    
+    func readData(object: Object, key: String) -> Object {
+        let objectType = type(of: object)
+        guard let readData = realm.object(ofType: objectType.self, forPrimaryKey: key) else {
+            let errorObject = ErrorObject()
+            return errorObject
+        }
+        return readData
     }
     
     func update(action: () -> Void) {
