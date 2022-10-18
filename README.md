@@ -16,12 +16,13 @@
 <img src="https://img.shields.io/badge/Python-3776AB?style=flat&logo=Python&logoColor=white">
 
 🍀 Swift Skill 🍀
-| Available | Studying |
-| UIKit | RxSwift
-| SnapKit | Socket
-| alamofire |
-| Realm |
-| FireBase |
+|Available|Studying|
+|---|:---:|---:\
+|UIKit|RxSwift||
+|SnapKit|Socket||
+|alamofire|||
+|Realm|||
+|FireBase|||
 
 📖 Studying 📖
 - RxSwift
