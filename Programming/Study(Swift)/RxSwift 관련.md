@@ -373,15 +373,191 @@
 </div>
 </details>
 
+### Operator
+- RxSwift 에는 많은 Operator 가 존재한다.
 
+<details>
+<summary>1. Filtering Operator</summary>
+<div markdown="1">
 
+1. ignoreElements : onNex를 무시한다고 보면 됨
+```swift
+let sleepMode = PublishSubject<String>()
 
+sleepMode
+    .ignoreElements()
+    .subscribe { _ in
+        print("WAkE UP!!!")
+    }.disposed(by: disposeBag)
 
+sleepMode.onNext("WAKEEEEE")
+sleepMode.onNext("WAKEEEEE")
+sleepMode.onNext("WAKEEEEE")
+sleepMode.onCompleted()
 
+// WAKE UP!!
+```
 
+2. element(at:) : 특정 인덱스 번호(값이 아님!!!)에 대한 onNext 만 방출
+```swift
+let secondWake = PublishSubject<String>()
 
+secondWake
+    .element(at: 2)
+    .subscribe(onNext: {
+        print($0)
+    }).disposed(by: disposeBag)
 
+secondWake.onNext("0")
+secondWake.onNext("1")
+secondWake.onNext("2")
+secondWake.onNext("3")
+secondWake.onNext("4")
 
+// 2
+```
+
+3. filter : 조건에 부합하는 요소들만 방출
+```swift
+Observable.of(1,2,3,4,5,6,7,8)
+    .filter { $0 % 2 == 0 }
+    .subscribe(onNext : {
+        print($0)
+    }).disposed(by: disposeBag)
+    
+// 2
+// 4
+// 6
+// 8
+```
+
+4. skip : 첫번째 요소부터 n번째 요소까지 스킵
+```swift
+Observable.of(1,2,3,4,5,6,7)
+    .skip(5)
+    .subscribe(onNext: {
+        print($0)
+    }).disposed(by: disposeBag)
+    
+// 6
+// 7
+```
+
+5. skip(while:) : 어떤 요소를 내보내지 않다가 조건에 맞을 경우 내보냄
+```swift
+Observable.of(1,2,3,4,5,6,7,8,9)
+    .skip(while: {
+        $0 < 8
+    })
+    .subscribe(onNext: {
+        print($0)
+    }).disposed(by: disposeBag)
+
+// 8
+// 9
+```
+
+6. skip(until:) : until에 있는 Observable이 방출되기 전까지 그 전의 동작에 대해서는 무시
+```swift
+let person = PublishSubject<String>()
+let openTime = PublishSubject<String>()
+
+person
+    .skip(until: openTime)
+    .subscribe(onNext: {
+        print($0)
+    }).disposed(by: disposeBag)
+
+person.onNext("First")
+person.onNext("Second")
+openTime.onNext("Open")
+person.onNext("Third")
+
+// Third
+```
+
+7. take : 첫번째부터 n번째까지만 내보내고 그 이후는 스킵 > skip의 반대 방식
+```swift
+Observable.of(1,2,3,4,5)
+    .take(3)
+    .subscribe(onNext: {
+        print($0)
+    }).disposed(by: disposeBag)
+    
+// 1
+// 2
+// 3
+```
+
+8. take(while:) : 요소들을 내보내다가 조건에 맞는 경우 요소를 내보내지 않음 > skip(while:)의 반대 방식
+```swift
+Observable.of(1,2,3,4,5)
+    .take(while: {
+        $0 != 3
+    })
+    .subscribe(onNext: {
+        print($0)
+    }).disposed(by: disposeBag)
+    
+// 1
+// 2
+```
+
+9. enumerated : 방출될때 해당 요소의 인덱스까지 같이 방출함 > 방출된 요소의 인덱스 필요할 때 사용함
+```swift
+Observable.of(1,2,3,4,5)
+    .enumerated()
+    .take(while: {
+        $0.index < 3
+    }).subscribe(onNext: {
+        print($0)
+    }).disposed(by: disposeBag)
+    
+// (index: 0, element: 1)
+// (index: 1, element: 2)
+// (index: 2, element: 3)
+```
+
+10. take(until:) : until에 들어있는 Observable이 방출된 후의 동작은 무시 > skip(until:)과 반대로 작용
+```swift
+let applicate = PublishSubject<String>()
+let end = PublishSubject<String>()
+
+applicate
+    .take(until: end)
+    .subscribe(onNext: {
+        print($0)
+    }).disposed(by: disposeBag)
+
+applicate.onNext("First")
+applicate.onNext("Second")  
+end.onNext("End")
+applicate.onNext("Third")
+
+// First
+// Second
+```
+
+11. distinctUntilChanged : 연달아 같은 값이 입력될 때 중복된 값을 무시하는 필터
+```swift
+Observable.of(1,1,2,2,3,3,4,4,5,5,1,2,2,2,2,3)
+    .distinctUntilChanged()
+    .subscribe(onNext: {
+        print($0)
+    }).disposed(by: disposeBag)
+    
+// 1
+// 2
+// 3
+// 4
+// 5
+// 1
+// 2
+// 3
+```
+
+</div>
+</details>
 
 
 
