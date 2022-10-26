@@ -273,7 +273,7 @@
 <div markdown="1">
 
 1. Public Subject : 비어있는 상태로 시작해서 새 값이 발생하면 새 값을 subscribe 에 방출함
-    - 결과에서 보면 알 수 있듯이 처음 .onNext 는 subscribe 가 되지 않아 출력이 되지 않으며 마지막 .onNext 는 dispose 되어 출력 되지 않음을 알 수 있음
+    - 결과에서 보면 알 수 있듯이 처음 .onNext 는 subscribe 가 되지 않아 출력이 되지 않으며 마지막 .onNext 는 dispose 되어 출력 되지 않음
 
     ```swift
     let publishSubject = PublishSubject<String>()
