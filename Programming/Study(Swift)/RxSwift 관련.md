@@ -268,9 +268,9 @@
     2. Behavior Subject
     3. Replay Subject
     <br>
-    <details>
-    <summary>Subject 설명</summary>
-    <div markdown="1">
+<details>
+<summary>Subject 설명</summary>
+<div markdown="1">
         1. Public Subject : 비어있는 상태로 시작해서 새 값이 발생하면 새 값을 subscribe 에 방출함
             ```swift
             let publishSubject = PublishSubject<String>()
@@ -366,8 +366,8 @@
             // Second Subscribe:  error(error1)
             // Third Subscribe:  error(Object `RxSwift.(unknown context at $10573f460).ReplayMany<Swift.String>` was already disposed.)
             ```
-    </div>
-    </details>
+</div>
+</details>
 
 
 
