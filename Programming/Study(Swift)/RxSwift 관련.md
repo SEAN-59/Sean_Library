@@ -267,105 +267,105 @@
     1. Public Subject
     2. Behavior Subject
     3. Replay Subject
-    <br>
+
 <details>
 <summary>Subject 설명</summary>
 <div markdown="1">
-        1. Public Subject : 비어있는 상태로 시작해서 새 값이 발생하면 새 값을 subscribe 에 방출함
-            ```swift
-            let publishSubject = PublishSubject<String>()
-            publishSubject.onNext("Hello")
-            
-            let subscriber1 = publishSubject
-                .subscribe(onNext: { print($0) })
-            publishSubject.onNext("Hi?")
-            publishSubject.onNext("Can U hear me?")
-
-            subscriber1.dispose()
-
-            let subscriber2 = publishSubject
-                .subscribe(onNext:{ print($0) })
-
-            publishSubject.onNext("Hello~?")
-            publishSubject.onCompleted()
-
-            publishSubject.onNext("It's done")
-
-            subscriber2.dispose()
-
-            publishSubject
-                .subscribe{
-                    print("3rd Subscribe:", $0.element ?? $0)
-                }.disposed(by: disposeBag)
-            
-            publishSubject.onNext("R U Sure?")
-
-            // Hi?
-            // Can U hear me?
-            // Hello~?
-            // 3rd Subscribe: completed
-            ```
-            - 결과에서 보면 알 수 있듯이 처음 .onNext 는 subscribe 가 되지 않아 출력이 되지 않으며 마지막 .onNext 는 dispose 되어 출력 되지 않음을 알 수 있음
-            
-        2. Behavior Subject : 하나의 초기값을 가진 상태로 시작해 새 Subscribe가 생겼을 때, 초기값 또는 최근값을 방출함
-        - Observable 은 subscribe 내에서 값을 가지고 활용을 하지만 Behavior Subject 는 value 를 뽑아내는게 가능함
-            ```swift
-            enum SubjectError: Error {
-                case error1
-            }
-
-            let behaviorSubject = BehaviorSubject<String>(value: "initValue")
-            behaviorSubject.onNext("First Value")
-
-            behaviorSubject.subscribe {
-                print("First: ", $0.element ?? $0)
-            }.disposed(by: disposeBag)
-
-            behaviorSubject.onError(SubjectError.error1)
-
-            behaviorSubject.subscribe {
-                print("Second: ", $0.element ?? $0)
-            }.disposed(by: disposeBag)
-
-            // First:  First Value
-            // First:  error(error1)
-            // Second:  error(error1)
-            ```
+    1. Public Subject : 비어있는 상태로 시작해서 새 값이 발생하면 새 값을 subscribe 에 방출함
+        ```swift
+        let publishSubject = PublishSubject<String>()
+        publishSubject.onNext("Hello")
         
-        3. Replay Subject : 버퍼를 두고 초기화를 하게 되고 버퍼사이즈 만큼의 이벤트를 유지하며 새 subscribe 발생시 이벤트를 방출함
-            ```swift
-            let replaySubject = ReplaySubject<String>.create(bufferSize: 2)
+        let subscriber1 = publishSubject
+            .subscribe(onNext: { print($0) })
+        publishSubject.onNext("Hi?")
+        publishSubject.onNext("Can U hear me?")
 
-            replaySubject.onNext("First")
-            replaySubject.onNext("Second")
-            replaySubject.onNext("Third")
+        subscriber1.dispose()
 
-            replaySubject.subscribe {
-                print("First SubScriber:", $0.element ?? $0)
+        let subscriber2 = publishSubject
+            .subscribe(onNext:{ print($0) })
+
+        publishSubject.onNext("Hello~?")
+        publishSubject.onCompleted()
+
+        publishSubject.onNext("It's done")
+
+        subscriber2.dispose()
+
+        publishSubject
+            .subscribe{
+                print("3rd Subscribe:", $0.element ?? $0)
             }.disposed(by: disposeBag)
+            
+        publishSubject.onNext("R U Sure?")
 
-            replaySubject.subscribe {
-                print("Second Subscribe: ", $0.element ?? $0)
-            }.disposed(by: disposeBag)
+        // Hi?
+        // Can U hear me?
+        // Hello~?
+        // 3rd Subscribe: completed
+        ```
+        - 결과에서 보면 알 수 있듯이 처음 .onNext 는 subscribe 가 되지 않아 출력이 되지 않으며 마지막 .onNext 는 dispose 되어 출력 되지 않음을 알 수 있음
+            
+    2. Behavior Subject : 하나의 초기값을 가진 상태로 시작해 새 Subscribe가 생겼을 때, 초기값 또는 최근값을 방출함
+    - Observable 은 subscribe 내에서 값을 가지고 활용을 하지만 Behavior Subject 는 value 를 뽑아내는게 가능함
+        ```swift
+        enum SubjectError: Error {
+            case error1
+        }
 
-            replaySubject.onNext("Fourth")
-            replaySubject.onError(SubjectError.error1)
-            replaySubject.dispose()
+        let behaviorSubject = BehaviorSubject<String>(value: "initValue")
+        behaviorSubject.onNext("First Value")
 
-            replaySubject.subscribe {
-                print("Third Subscribe: ", $0.element ?? $0)
-            }.disposed(by: disposeBag)
+        behaviorSubject.subscribe {
+            print("First: ", $0.element ?? $0)
+        }.disposed(by: disposeBag)
 
-            // First SubScriber: Second
-            // First SubScriber: Third
-            // Second Subscribe:  Second
-            // Second Subscribe:  Third
-            // First SubScriber: Fourth
-            // Second Subscribe:  Fourth
-            // First SubScriber: error(error1)
-            // Second Subscribe:  error(error1)
-            // Third Subscribe:  error(Object `RxSwift.(unknown context at $10573f460).ReplayMany<Swift.String>` was already disposed.)
-            ```
+        behaviorSubject.onError(SubjectError.error1)
+
+        behaviorSubject.subscribe {
+            print("Second: ", $0.element ?? $0)
+        }.disposed(by: disposeBag)
+
+        // First:  First Value
+        // First:  error(error1)
+        // Second:  error(error1)
+        ```
+        
+    3. Replay Subject : 버퍼를 두고 초기화를 하게 되고 버퍼사이즈 만큼의 이벤트를 유지하며 새 subscribe 발생시 이벤트를 방출함
+        ```swift
+        let replaySubject = ReplaySubject<String>.create(bufferSize: 2)
+
+        replaySubject.onNext("First")
+        replaySubject.onNext("Second")
+        replaySubject.onNext("Third")
+
+        replaySubject.subscribe {
+            print("First SubScriber:", $0.element ?? $0)
+        }.disposed(by: disposeBag)
+
+        replaySubject.subscribe {
+            print("Second Subscribe: ", $0.element ?? $0)
+        }.disposed(by: disposeBag)
+
+        replaySubject.onNext("Fourth")
+        replaySubject.onError(SubjectError.error1)
+        replaySubject.dispose()
+
+        replaySubject.subscribe {
+            print("Third Subscribe: ", $0.element ?? $0)
+        }.disposed(by: disposeBag)
+
+        // First SubScriber: Second
+        // First SubScriber: Third
+        // Second Subscribe:  Second
+        // Second Subscribe:  Third
+        // First SubScriber: Fourth
+        // Second Subscribe:  Fourth
+        // First SubScriber: error(error1)
+        // Second Subscribe:  error(error1)
+        // Third Subscribe:  error(Object `RxSwift.(unknown context at $10573f460).ReplayMany<Swift.String>` was already disposed.)
+        ```
 </div>
 </details>
 
