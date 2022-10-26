@@ -272,6 +272,7 @@
 <summary>Subject 설명</summary>
 <div markdown="1">
 1. Public Subject : 비어있는 상태로 시작해서 새 값이 발생하면 새 값을 subscribe 에 방출함
+    - 결과에서 보면 알 수 있듯이 처음 .onNext 는 subscribe 가 되지 않아 출력이 되지 않으며 마지막 .onNext 는 dispose 되어 출력 되지 않음을 알 수 있음
 
     ```swift
     let publishSubject = PublishSubject<String>()
@@ -306,8 +307,7 @@
     // Hello~?
     // 3rd Subscribe: completed
     ```
-- 결과에서 보면 알 수 있듯이 처음 .onNext 는 subscribe 가 되지 않아 출력이 되지 않으며 마지막 .onNext 는 dispose 되어 출력 되지 않음을 알 수 있음
-            
+         
 2. Behavior Subject : 하나의 초기값을 가진 상태로 시작해 새 Subscribe가 생겼을 때, 초기값 또는 최근값을 방출함
     - Observable 은 subscribe 내에서 값을 가지고 활용을 하지만 Behavior Subject 는 value 를 뽑아내는게 가능함
 
