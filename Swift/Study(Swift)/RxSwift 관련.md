@@ -16,7 +16,7 @@
     3. error 이벤트 방출해 완전 종료 가능
 
 <details>
-<summary> ##### Obsevable의 명령어 </summary>
+##### <summary> Observable의 명령어</summary>
 <div markdown="1">
 
 1. Just : 하나의 요소만 포함하는 Observable 시퀀스를 생성하는 명령어
