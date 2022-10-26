@@ -186,11 +186,11 @@
     - Error 는 error 단에서 Observable을 종료시킴
     ```swift
     Observable.create { observer -> Disposable in
-    observer.onNext(1)
-    observer.onCompleted()
-    observer.onNext(2)
-    return Disposables.create()
-    } .subscribe{print($0)}
+        observer.onNext(1)
+        observer.onCompleted()
+        observer.onNext(2)
+        return Disposables.create()
+    } .subscribe{ print($0) }
         .disposed(by: disposeBag)
     // 1
     ```
