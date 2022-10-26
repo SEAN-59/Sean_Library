@@ -559,7 +559,234 @@ Observable.of(1,1,2,2,3,3,4,4,5,5,1,2,2,2,2,3)
 </div>
 </details>
 
+<details>
+<summary>2. Transforming Operator</summary>
+<div markdown="1">
 
+1. toArray : 독립적으로 많은 양의 요소를 넣어도 하나의 array로 나오게 만듬 > 요소를 배열로 append 같은거지 뭐.
+```swift
+Observable.of(1,2,3,4,5)
+    .toArray()
+    .subscribe(onSuccess: {
+        print($0)
+    } ).disposed(by: disposeBag)
+
+// [1, 2, 3, 4, 5]
+```
+
+2. map : map = map
+```swift
+Observable.of(Date())
+    .map { date -> String in
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        dateFormatter.locale = Locale(identifier: "ko_KR")
+        return dateFormatter.string(from: date)
+    }.subscribe(onNext: {
+        print($0)
+    }).disposed(by: disposeBag)
+    
+// 2022-08-10
+```
+
+3. flatMap : Observable 안에 Observable 같이 중첩되어 있는 경우에 이 명령어로 꺼내 볼 수 있음
+- koreaMember 는 BowMan 이면서 Player 이므로 score를 보기 위해서 사용함
+- 결과는 초기값이 있는 상황에서 koreaMember가 onNext 가 되었으므로 그 값이 나오고 후에 onNext 로 점수를 넣게되어 값이 방출됨
+```swift
+protocol Player {
+    var score: BehaviorSubject<Int> { get }
+}
+
+struct BowMan: Player {
+    var score: BehaviorSubject<Int>
+}
+
+let koreaMember = BowMan(score: BehaviorSubject<Int>(value: 10))
+let amricaMember = BowMan(score: BehaviorSubject<Int>(value: 8))
+
+let stadium = PublishSubject<Player>()
+
+stadium
+    .flatMap { Player in
+        Player.score
+    }.subscribe(onNext: {
+        print($0)
+    }).disposed(by: disposeBag)
+
+stadium.onNext(koreaMember)
+koreaMember.score.onNext(10)
+
+stadium.onNext(amricaMember)
+amricaMember.score.onNext(10)
+
+// 10
+// 10
+// 8
+// 10
+```
+
+4. flatMapLatest : 가장 최근의 Observable에서 값을 생성하고 그 이전에 발생한 Observable의 subscribe를 해지 > flat + switchLatest 의 형태라 보면 됨
+- 결과에서 처음 seoul이 onNext 될 때 초기값이 7이 나오게 되고 다시 onNext 되었을 때 9가 나오게 된다.
+- 하지만 두번째 contest에 jeju가 onNext 되면서 flatMapLatest 의 기능인 가장 최근의 Observable 에서 값을 생성하는 기능으로 seoul의 subscribe는 해지된다.
+- 즉, 3번째 결과인 6은 jeju 의 초기값인 6이지만 4번째 결과인 8은 seoul.score.onNext(10)을 했음에도 
+contest.onNext(jeju) 이 명령어로 해지가 되었기에 그 값은 방출되지 않고 바로 다음 명령어인 
+jeju.score.onNext(8) 가 동작해 8이 방출되었다.
+
+```swift
+struct Jump: Player {
+    var score: BehaviorSubject<Int>
+}
+
+let seoul = Jump(score: BehaviorSubject<Int>(value: 7))
+let jeju = Jump(score: BehaviorSubject<Int>(value: 6))
+
+let contest = PublishSubject<Player>()
+
+contest
+    .flatMapLatest { Player in
+        Player.score
+    }.subscribe(onNext: {
+        print($0)
+    }).disposed(by: disposeBag)
+
+contest.onNext(seoul)
+seoul.score.onNext(9)
+
+contest.onNext(jeju)
+seoul.score.onNext(10)
+jeju.score.onNext(8)
+
+
+// 7
+// 9
+// 6
+// 8
+```
+
+5. materialize and dematerialize : Observable을 Observable의 이벤트로 변환해야 할 때 사용.
+- 보통의 경우 Observable 속성을 가진 Observable을 제어할 수 없는데 외부적으로 Observable이 종료되는것을 방지하기 위해서 error 이벤트를 처리하고 싶을 수 있는 데 그때 사용함
+```swift
+enum Foul: Error {
+    case FastStart
+}
+
+struct Runner: Player {
+    var score: BehaviorSubject<Int>
+}
+
+let kim = Runner(score: BehaviorSubject<Int>(value: 0))
+let lee = Runner(score: BehaviorSubject<Int>(value: 1))
+
+let game = BehaviorSubject<Player>(value: kim)
+
+game
+    .flatMapLatest { Player in
+        Player.score
+            .materialize()
+    }.subscribe(onNext: {
+        print($0)
+    }).disposed(by: disposeBag)
+
+kim.score.onNext(1)
+kim.score.onError(Foul.FastStart)
+kim.score.onNext(2)
+
+game.onNext(lee)
+
+// next(0)
+// next(1)
+// error(FastStart)
+// next(1)
+```
+----
+- materialize를 사용하지 않을 경우
+- 사용하지 않을 경우 Error가 발생하게 되면 그 순간 완전종료되어 그 다음 진행이 되지 않게 됨
+```swift
+enum Foul: Error {
+    case FastStart
+}
+
+struct Runner: Player {
+    var score: BehaviorSubject<Int>
+}
+
+let kim = Runner(score: BehaviorSubject<Int>(value: 0))
+let lee = Runner(score: BehaviorSubject<Int>(value: 1))
+
+let game = BehaviorSubject<Player>(value: kim)
+
+game
+    .flatMapLatest { Player in
+        Player.score
+    }.subscribe(onNext: {
+        print($0)
+    }).disposed(by: disposeBag)
+
+kim.score.onNext(1)
+kim.score.onError(Foul.FastStart)
+kim.score.onNext(2)
+
+game.onNext(lee)
+
+// 0
+// 1
+// Unhandled error happened: FastStart
+```
+- dematerialize : materialize 에서 동작 과정까지 나오던 걸 없애고 보여준다.
+
+```swift
+enum Foul: Error {
+    case FastStart
+}
+
+struct Runner: Player {
+    var score: BehaviorSubject<Int>
+}
+
+let kim = Runner(score: BehaviorSubject<Int>(value: 0))
+let lee = Runner(score: BehaviorSubject<Int>(value: 1))
+
+let game = BehaviorSubject<Player>(value: kim)
+
+game
+    .flatMapLatest { Player in
+        Player.score
+            .materialize()
+    }
+    .filter {
+        guard let error = $0.error else { return true}
+        print(error)
+        return false
+    }.dematerialize()
+    .subscribe(onNext: {
+        print($0)
+    }).disposed(by: disposeBag)
+
+kim.score.onNext(1)
+kim.score.onError(Foul.FastStart)
+kim.score.onNext(2)
+
+game.onNext(lee)
+
+// 0
+// 1
+// FastStart
+// 1
+```
+
+</div>
+</details>
+
+
+
+
+<details>
+<summary></summary>
+<div markdown="1">
+
+
+</div>
+</details>
 
 
 
