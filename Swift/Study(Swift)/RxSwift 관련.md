@@ -20,18 +20,13 @@
 <div markdown="1">
 
 1. Just : 하나의 요소만 포함하는 Observable 시퀀스를 생성하는 명령어
-    <details>
-    <summary>코드</summary>
-    <div markdown="1">
-        ```swift
-        Observable<Int>.just(1)
-            .subscribe(onNext: {
-                print($0)
-            })
-            // 1
-        ```
-    <div>
-    </details>
+    ```swift
+    Observable<Int>.just(1)
+        .subscribe(onNext: {
+            print($0)
+        })
+        // 1
+    ```
 
 2. Of : 하나 이상의 이벤트를 넣을 수 있는 명령어
     <details>
