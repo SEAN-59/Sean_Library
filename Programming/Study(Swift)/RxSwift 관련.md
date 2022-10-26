@@ -781,7 +781,239 @@ game.onNext(lee)
 
 
 <details>
-<summary></summary>
+<summary>3. Combining</summary>
+<div markdown="1">
+
+- 다양한 방법으로 시퀀스를 모으고 각각의 시퀀스 내 데이터들을 병합하는 방법
+
+1. startWith : startWith에 들어간게 가장 먼저 방출 됨
+```swift
+let yellowClass = Observable.of("😁","🥲","🤭")
+
+yellowClass
+    .enumerated() // Observable 의 index 와 elements 를 분리 해주는 명령
+    .map ({ index, element in
+        return element + "어린이" + "\(index)"
+    })
+    .startWith("😆선생님") // 당연히 해당 Observable 과 동일한 타입으로 들어가야 함
+    .subscribe(onNext: {
+        print($0)
+    }).disposed(by: disposeBag)
+// 😆선생님
+// 😁어린이0
+// 🥲어린이1
+// 🤭어린이2
+```
+
+2. concat : 지정된 순서에 맞게 방출 됨
+- startWith는 concat의 변형이라 할 수 있음
+```swift
+let yellowClassChildren = Observable.of("😁","🥲","🤭")
+let teacher = Observable.of("😆선생님")
+
+let walkInLine = Observable
+    .concat([teacher,yellowClassChildren])
+    .subscribe(onNext: {
+        print($0)
+    }).disposed(by: disposeBag)
+
+// 😆선생님
+// 😁
+// 🥲
+// 🤭
+```
+---
+```swift
+teacher
+    .concat(yellowClassChildren)
+    .subscribe(onNext: {
+        print($0)
+    }).disposed(by: disposeBag)
+
+// 😆선생님
+// 😁
+// 🥲
+// 🤭
+```
+
+3. concatMap : flatMap과 밀접한 관계를 갖고 있다고 보면 됨
+- 각각의 시퀀스가 다음 시퀀스가 구독이 되기전에 합쳐짐
+- 각각의 시퀀스를 어떻게 append 할 수 있는가를 정하는게 이 역할
+```swift
+let careCenter: [String: Observable<String>] = [
+    "Yellow" : Observable.of("😁","🥲","🤭"),
+    "Blue" : Observable.of("🥶","🤖")
+]
+Observable.of("Yellow", "Blue")
+    .concatMap { classes in
+        careCenter[classes] ?? .empty()
+    }.subscribe(onNext: {
+        print($0)
+    }).disposed(by: disposeBag)
+
+// 😁
+// 🥲
+// 🤭
+// 🥶
+// 🤖
+```
+
+4. Merge : 시퀀스를 합치는 방식들 중에서 가장 쉬운 방법
+- 합쳐지는 시퀀스의 요소는 순서를 보장하지는 않음
+- merge를 사용하면 요소가 되는 Observable과 감싸고 있는 Observable이 끝이 나야 종료가 됨
+- 내부에 존재하는 시퀀스 간의 관계는 없음
+- 만약 하나라도 error가 발생을 하게 될 경우 그 즉시 error을 방출 후 멈추게 됨
+```swift
+let north = Observable.from(["강북구", "성북구", "동대문구", "종로구"])
+let south = Observable.from(["강남구", "강동구", "영등포구", "양천구"])
+
+Observable.of(north, south)
+    .merge()
+    .subscribe(onNext: {
+        print($0)
+    }).disposed(by: disposeBag)
+
+// 강북구
+// 성북구
+// 강남구
+// 동대문구
+// 강동구
+// 종로구
+// 영등포구
+// 양천구
+```
+----
+- 아래 코드에서의 결과값이 순서를 가진것처럼 보이겠지만 maxConcurrent에 적힌 수 만큼의 시퀀스만 한 번에 받기에 그렇게 보이는것 뿐이고 몇개가 되던 merge 안에 들어가게 되면 순서는 보장 할 수 없음
+- 네트워크의 양이 많아질 경우, 그 연결 수를 제한하거나 할 때 사용할것 같음 
+```swift
+Observable.of(north, south)
+    .merge(maxConcurrent: 1)
+    .subscribe(onNext: {
+        print($0)
+    }).disposed(by: disposeBag)
+
+// 강북구
+// 성북구
+// 동대문구
+// 종로구
+// 강남구
+// 강동구
+// 영등포구
+// 양천구
+```
+
+5. CombineLatest : 값을 방출할 때 마다 정해진 클로저를 호출하게 되고 받는 값은 combineLatest 의 최종값을 받게 됨
+```swift
+let lastName = PublishSubject<String>()
+let firstName = PublishSubject<String>()
+
+let name = Observable
+    .combineLatest(lastName, firstName) { lastName, firstName in
+        lastName + firstName
+    }
+
+name.subscribe(onNext: {
+    print($0)
+}).disposed(by: disposeBag)
+
+lastName.onNext("Kim")
+firstName.onNext("Sean")
+firstName.onNext("Jo")
+firstName.onNext("James")
+lastName.onNext("Lee")
+lastName.onNext("Park")
+lastName.onNext("Choi")
+
+// KimSean
+// KimJo
+// KimJames
+// LeeJames
+// ParkJames
+// ChoiJames
+```
+----
+```swift
+let dateFormat = Observable<DateFormatter.Style>.of(.short, .long)
+let currentDate = Observable<Date>.of(Date())
+
+let nowDate = Observable
+    .combineLatest(dateFormat,
+                   currentDate,
+                   resultSelector: { type, date -> String in
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = type
+        return dateFormatter.string(from: date)
+    })
+
+nowDate
+    .subscribe(onNext: {
+        print($0)
+    }).disposed(by: disposeBag)
+
+// 10/26/22
+// October 26, 2022
+```
+----
+```swift
+let fullName = Observable
+    .combineLatest([firstName, lastName]) { name in
+        name.joined(separator: " ")
+    }
+
+fullName
+    .subscribe(onNext: {
+        print($0)
+    }).disposed(by: disposeBag)
+
+lastName.onNext("Kim")
+firstName.onNext("Paul")
+firstName.onNext("Stella")
+firstName.onNext("Lily")
+
+// KimJames
+// KimPaul
+// Paul Kim
+// KimStella
+// Stella Kim
+// KimLily
+// Lily Kim
+```
+
+6. zip : zip으로 합치는 시퀀스 들 중 어느 하나의 요소가 적어 먼저 완료되게 되면 zip 전체가 끝남
+- 두 Observable 합치는데 5개, 10개의 시퀀스를 각각 갖고 있다면 5개만 합쳐지고 끝나게 됨
+```swift
+num VictoryOrDefeat {
+    case victory
+    case defeat
+}
+
+let fight = Observable<VictoryOrDefeat>.of(.victory,.defeat,.victory,.victory,.defeat)
+let player = Observable<String>.of("🇰🇷","🇬🇩","🇳🇿","🇬🇬","🇦🇶","🇳🇱")
+
+let result = Observable
+    .zip(fight, player) { result, player in
+        return player + "선수" + ": \(result)"
+    }
+
+result
+    .subscribe(onNext: {
+        print($0)
+    }).disposed(by: disposeBag)
+
+// 🇰🇷선수: victory
+// 🇬🇩선수: defeat
+// 🇳🇿선수: victory
+// 🇬🇬선수: victory
+// 🇦🇶선수: defeat
+```
+
+
+</div>
+</details>
+
+
+<details>
+<summary>4. TimeBased</summary>
 <div markdown="1">
 
 
@@ -789,6 +1021,17 @@ game.onNext(lee)
 </details>
 
 
+
+
+
+
+<details>
+<summary></summary>
+<div markdown="1">
+
+
+</div>
+</details>
 
 
 
