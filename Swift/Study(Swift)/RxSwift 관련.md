@@ -32,6 +32,7 @@
     ```
 <div>
 </details>
+
 2. Of : 하나 이상의 이벤트를 넣을 수 있는 명령어
 <details>
 <summary>코드</summary>
@@ -56,6 +57,7 @@
     ```
 <div>
 </details>
+
 3. From : array 형태의 요소만 받는 명령어
 <details>
 <summary>코드</summary>
