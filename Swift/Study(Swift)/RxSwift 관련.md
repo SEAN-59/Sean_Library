@@ -20,9 +20,9 @@
 <div markdown="1">
 
 1. Just : 하나의 요소만 포함하는 Observable 시퀀스를 생성하는 명령어
-<details>
-        <summary>코드</summary>
-<div markdown="1">
+    <details>
+    <summary>코드</summary>
+    <div markdown="1">
     ```swift
     Observable<Int>.just(1)
         .subscribe(onNext: {
@@ -30,13 +30,13 @@
         })
         // 1
     ```
-<div>
-</details>
+    <div>
+    </details>
 
 2. Of : 하나 이상의 이벤트를 넣을 수 있는 명령어
-<details>
-        <summary>코드</summary>
-<div markdown="1">
+    <details>
+    <summary>코드</summary>
+    <div markdown="1">
     ```swift
     Observable<Int>.of(1,2,3)
         .subscribe(onNext: {
