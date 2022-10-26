@@ -23,13 +23,13 @@
     <details>
     <summary>코드</summary>
     <div markdown="1">
-    ```swift
-    Observable<Int>.just(1)
-        .subscribe(onNext: {
-            print($0)
-        })
-        // 1
-    ```
+        ```swift
+        Observable<Int>.just(1)
+            .subscribe(onNext: {
+                print($0)
+            })
+            // 1
+        ```
     <div>
     </details>
 
