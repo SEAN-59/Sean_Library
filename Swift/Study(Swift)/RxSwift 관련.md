@@ -42,7 +42,6 @@
         .subscribe(onNext: {
             print($0)
         })
-        
     // 1
     // 2
     // 3
@@ -51,37 +50,34 @@
     Observable<Int>.of([1,2,3])
         .subscribe(onNext: {
             print($0)
-        })
-        
+        })  
     // [1,2,3]
     ```
-<div>
-</details>
+    <div>
+    </details>
 
 3. From : array 형태의 요소만 받는 명령어
-<details>
-        <summary>코드</summary>
-<div markdown="1">
+    <details>
+    <summary>코드</summary>
+    <div markdown="1">
     ```swift
     Observable.from([1,2,3]) 
     .subscribe(onNext:{
         print($0)
     })
-    
     // 1
     // 2
     // 3
     ```
-<div>
-</details>
+    <div>
+    </details>
 4. Subscribe : 어떤 명령어를 사용을 하던 구독을 하지 않으면 그 값을 보여주지 않음
     - onNext 와 같은 내부 파라미터를 선언하지 않으면 과정을 보여주게 됨
-<details>
-<summary>코드</summary>
-<div markdown="1">
+    <details>
+    <summary>코드</summary>
+    <div markdown="1">
     ```swift
     Observable.of(1,2,3).subscribe{ print($0) }
-
     // next(1)
     // next(2)
     // next(3)
@@ -93,20 +89,20 @@
             print(element)
         }
     }
-    
     // 1
     // 2
     // 3
     ```
-<div>
-</details>
+    <div>
+    </details>
+
 5. Empty : 아무런 요소를 가지지 않음
     - 아무런 요소를 가지지 않기에 Observable 에서 타입 추론 할 수 없음
     - Type을 명시적으로 써주면 추론이 가능해진다. void 와 매우 잘 맞음
     - 즉시 종료하고자 하는 Observable 을 갖고자 하거나, 의도적으로 0개의 값을 갖는 Observable 리턴시 사용
-<details>
-<summary>코드</summary>
-<div markdown="1">
+    <details>
+    <summary>코드</summary>
+    <div markdown="1">
     ```swift
     Observable.empty().subscribe { print($0) }
     //
@@ -129,12 +125,13 @@
                onCompleted: { print("Completed") } )
     // completed
     ```
-<div>
-</details>
+    <div>
+    </details>
+
 6. Never : 작동은 하지만 아무것도 내보내지 않음 -> debug 를 사용해 동작 되는지 확인 가능
-<details>
-<summary>코드</summary>
-<div markdown="1">
+    <details>
+    <summary>코드</summary>
+    <div markdown="1">
     ```swift
     Observable.never()
     .subscribe(onNext: {
@@ -156,12 +153,13 @@
     })
     // 2022-10-26 00:44:36.770: Observable.playground:61 (__lldb_expr_123) -> subscribed
     ```
-<div>
-</details>
+    <div>
+    </details>
+
 7. Range : start 값을 count 만큼 증가하면서 요소에 추가함 -> 반복문 느낌이랄까
-<details>
-<summary>코드</summary>
-<div markdown="1">
+    <details>
+    <summary>코드</summary>
+    <div markdown="1">
     ```swift
     Observable.range(start: 1, count: 10)
     .subscribe(onNext: {
@@ -182,12 +180,13 @@
     // 2*10 = 20
     // Completed
     ```
-<div>
-</details>
+    <div>
+    </details>
+
 8. Dispose : Subscribe 를 끊고 싶을 때 사용함 -> 메모리 누수 방지를 위해 사용
-<details>
-<summary>코드</summary>
-<div markdown="1">
+    <details>
+    <summary>코드</summary>
+    <div markdown="1">
     ```swift
     Observable.of(1,2,3)
     .subscribe(onNext: {
@@ -197,12 +196,13 @@
     // 2
     // 3
     ```
-<div>
-</details>
+    <div>
+    </details>
+
 9. DisposeBag : 8번과 같지만 사용법이 조금 다름
-<details>
-<summary>코드</summary>
-<div markdown="1">
+    <details>
+    <summary>코드</summary>
+    <div markdown="1">
     ```swift
     let disposeBag = DisposeBag()
     Observable.of(1,2,3)
@@ -213,13 +213,14 @@
     // 2
     // 3
     ```
-<div>
-</details>
+    <div>
+    </details>
+
 10. Create : escaping Closure 로 Any Observable 을 취하고 diposable 을 리턴하는 방식
     - Error 는 error 단에서 Observable을 종료시킴
-<details>
-<summary>코드</summary>
-<div markdown="1">
+    <details>
+    <summary>코드</summary>
+    <div markdown="1">
     ```swift
     Observable.create { observer -> Disposable in
     observer.onNext(1)
@@ -259,13 +260,14 @@
     // The operation couldn’t be completed. (__lldb_expr_123.MyError error 0.)
     // Disposed
     ```
-<div>
-</details>
+    <div>
+    </details>
+
 11. Deffered : subscribe 를 기다리는 Observable을 만드는 대신, 각 subscribe에 Observable 항목을 제공하는 Observable Factory를 만드는 방식
     - 그냥 observable을 모아서 만들고 한 번에 subscribe 하는 느낌
-<details>
-<summary>코드</summary>
-<div markdown="1">
+    <details>
+    <summary>코드</summary>
+    <div markdown="1">
     ```swift
     Observable.deferred {
         Observable.of(1,2,3)
@@ -295,8 +297,8 @@
     // 🤝
     // 👏
     ```
-<div>
-</details>
+    <div>
+    </details>
 
 </div>
 </details>
