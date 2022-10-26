@@ -267,7 +267,7 @@
     1. Public Subject
     2. Behavior Subject
     3. Replay Subject
-    
+    <br>
     <details>
     <summary>Subject 설명</summary>
     <div markdown="1">
