@@ -8,6 +8,8 @@
 - Operator
 - Scheduler : 직접 만들어서 사용하는 경우가 많지는 않음
 
+## 
+
 ### Observable
 - 비동기적이며 일정시간 동안 계속해서 이벤트를 생성함
 - Every Observable instance is just a sequence : subscribe 되기 전에는 아무 이벤트도 내보내지 않음
@@ -528,6 +530,8 @@ Completable.create { observer -> Disposable in
     ```
 </div>
 </details>
+
+## 
 
 ### Operator
 - RxSwift 에는 많은 Operator 가 존재한다.
