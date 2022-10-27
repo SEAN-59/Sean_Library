@@ -260,10 +260,12 @@
 </div>
 </details>
 
+## ---
+
 ### Traits
 - 전부 Observable이나 좁은 범위의 Observable
   - 그러면 왜 좁은 범위인 Traits 을 쓸까? = 가독성을 높이기에는 최고다
-  
+
 <details>
 <summary>Traits 종류 별 설명</summary>
 
