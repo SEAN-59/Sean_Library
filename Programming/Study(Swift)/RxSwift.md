@@ -1019,6 +1019,259 @@ result
 - 과거의 요소들을 subscribe에게 다시 재생하거나 잠시 buffer 를 두고 줄 수 있어서 언제, 어떻게 과거와 새로운 요소들을 전달할건지 컨트롤 할 수 있게 해줌
 과거의 요소들을 replay 하는 방식들이 존재해서 sequence가 item을 방출했을 때 보통 미래의 구독자가 지나간 Item을 받을 수 있는지 아닌지에 대해 전달해 줌
 
+1. replay 
+```swift
+let helloWord = PublishSubject<String>()
+let parrot = helloWord.replay(1)
+
+parrot.connect()
+
+helloWord.onNext("1. Hello")
+helloWord.onNext("2. Hi")
+
+parrot
+    .subscribe(onNext: {
+        print($0)
+    })
+    .disposed(by: disposeBag)
+
+helloWord.onNext("3. What's up")
+
+// 2. Hi
+// 3. What's up
+```
+- replay 사용시에는 반드시 connect로 연결을 시켜줘야 함
+- 구독을 뒤 늦게 했지만 replay 에서 지나간 1개는 받을 수 있게 해뒀기에 출력이 되는것을 알 수 있음
+
+1. replayAll
+```swift
+let doctorStrange = PublishSubject<String>()
+let timeStone = doctorStrange.replayAll()
+timeStone.connect()
+
+doctorStrange.onNext("HELLO")
+doctorStrange.onNext("HI")
+
+timeStone
+    .subscribe(onNext: {
+        print($0)
+    })
+    .disposed(by: disposeBag)
+
+// HELLO
+// HI
+```
+
+3. buffer
+```swift
+let source = PublishSubject<String>()
+var count = 0
+let timer = DispatchSource.makeTimerSource()
+
+timer.schedule(deadline: .now() + 2 , repeating: .seconds(1))
+timer.setEventHandler {
+    count += 1
+    source.onNext("\(count)")
+}
+timer.resume()
+
+source
+    .buffer(timeSpan: .seconds(2),
+            count: 2,
+            scheduler: MainScheduler.instance
+    ).subscribe(onNext: {
+        print($0)
+    })
+    .disposed(by: disposeBag)
+
+// []
+// ["1", "2"]
+// ["3", "4"]
+// ["5", "6"]
+// ["7"]
+// ["8", "9"]
+// ["10", "11"]
+// ["12", "13"]
+// ["14"]
+// ["15", "16"]
+// ["17", "18"]
+// ...
+```
+
+4. window : buffer 과 비슷해서 거의 같아보이지만 buffer가 array를 방출 한다면 window 는 Observable을 방출함
+```swift
+let maximumObservableNum = 5
+let makeTime = RxTimeInterval.seconds(2)
+
+let window = PublishSubject<String>()
+
+var windowCount = 0
+let windowTimerSource = DispatchSource.makeTimerSource()
+windowTimerSource.schedule(deadline: .now() + 2, repeating: .seconds(1))
+windowTimerSource.setEventHandler {
+    windowCount += 1
+    window.onNext("\(windowCount)")
+}
+windowTimerSource.resume()
+
+window
+    .window(
+        timeSpan: makeTime,
+        count: maximumObservableNum,
+        scheduler: MainScheduler.instance
+    )
+    .flatMap { windowObservable -> Observable<(index: Int, element: String)> in
+        return windowObservable.enumerated()
+    }
+    .subscribe(onNext: {
+        print("\($0.index)번째 Observable의 요소 \($0.element)")
+    })
+    .disposed(by: disposeBag)
+
+// 0번째 Observable의 요소 1
+// 0번째 Observable의 요소 2
+// 1번째 Observable의 요소 3
+// 0번째 Observable의 요소 4
+// 1번째 Observable의 요소 5
+// 0번째 Observable의 요소 6
+// 1번째 Observable의 요소 7
+// 0번째 Observable의 요소 8
+// 1번째 Observable의 요소 9
+// 0번째 Observable의 요소 10
+// ...
+```
+
+5. delaySubscription
+- 소스가 되는 Observable 이 방출하는 이벤트를 정해진 시점이 지난 다음부터 구독을 하겠다고 조절을 하는 Operator
+```swift
+let delaySource = PublishSubject<String>()
+
+var delayCount = 0
+let delayTimeSource = DispatchSource.makeTimerSource()
+delayTimeSource.schedule(deadline: .now() + 2, repeating: .seconds(1))
+delayTimeSource.setEventHandler {
+    delayCount += 1
+    delaySource.onNext("\(delayCount)")
+}
+delayTimeSource.resume()
+
+delaySource
+    .delaySubscription(.seconds(2), scheduler: MainScheduler.instance)
+    .subscribe(onNext: {
+        print($0)
+    })
+    .disposed(by: disposeBag)
+
+// 1
+// 2
+// 3
+// 4
+// 5
+// ...
+```
+
+6. delay
+- 전체 시퀀스를 뒤로 미루는 작업을 하며, 구독은 바로 해도 요소의 방출을 늦추는 작업을 한다.
+```swift
+let delaySubject = PublishSubject<Int>()
+
+var delayCount = 0
+let delayTimerSource = DispatchSource.makeTimerSource()
+delayTimerSource.schedule(deadline: .now(), repeating: .seconds(1))
+delayTimerSource.setEventHandler {
+    delayCount += 1
+    delaySubject.onNext(delayCount)
+}
+delayTimerSource.resume()
+
+delaySubject
+    .delay(.seconds(3), scheduler: MainScheduler.instance)
+    .subscribe(onNext: {
+        print($0)
+    })
+    .disposed(by: disposeBag)
+
+// ....delay 중
+// 1
+// 2
+// 3
+// ...
+```
+
+7. Interval
+- 어떤 앱은 타이머가 필요로 하게 되는데 이에 대한 다양한 솔루션이 존재를 한다.
+- DispatchSource 를 통해 타이머를 만들 수 있지만 적절한 사용이 어렵다. 기존의 NSTimer 보다는 나은 솔루션이지만 EventHandler없이는 매핑이 불가능하다.
+- 그래서 이와 관련해서 Rx에서 제공하는 솔루션이 바로 이 Operator 이다.
+```swift
+Observable<Int>
+    .interval(.seconds(3), scheduler: MainScheduler.instance)
+    .subscribe(onNext: {
+        print($0)
+    })
+    .disposed(by: disposeBag)
+
+// ....Timer
+// 0
+// ....Timer
+// 1
+// ....Timer
+// 2
+// ...
+```
+
+8. Timer
+- Interval 보다 좀 더 강력한 형태로서 유사한 부분이 있지만 차이점이 존재한다.
+- 구독 후 첫 번째 값을 방출하는 사이에 데드라인 설정이 가능하다. > 반복하는 기간은 옵셔널이라서 설정 안하면 1회 반복 후 끝
+- dueTime 은 구독을 시작하는데에 대한 딜레이의 값이고 period 는 딜레이의 값이다.
+```swift
+Observable<Int>
+    .timer(.seconds(5), period: .seconds(2), scheduler: MainScheduler.instance)
+    .subscribe(onNext: {
+        print($0)
+    })
+    .disposed(by: disposeBag)
+
+// ....Timer
+// 0
+// ....Timer
+// 1
+// ....Timer
+// 2
+// ...
+```
+
+9. Timeout
+- Timeout은 정해둔 시간을 초과하게 되면 에러를 발산시키고 전체 Observable을 종료시킴
+- RxCocoa 에서 버튼 탭하는걸 만들어서 사용함
+- 5초 내에 버튼을 누르게 될경우 값을 방출하나 5초가 지나도 누르지 않을 경우 에러를 방출함
+```swift
+let ifDontTouchError = UIButton(type: .system)
+ifDontTouchError.setTitle("눌러주세요", for: .normal)
+ifDontTouchError.sizeToFit()
+
+PlaygroundPage.current.liveView = ifDontTouchError
+
+ifDontTouchError.rx.tap
+    .do(onNext: {
+        print("tap")
+    })
+    .timeout(.seconds(5), scheduler: MainScheduler.instance)
+    .subscribe {
+        print($0)
+    }
+    .disposed(by: disposeBag)
+
+// tap
+// next(())
+// tap
+// next(())
+// ....Timer
+// error(Sequence timeout.)
+```
+
+
+
+
 
 </div>
 </details>
