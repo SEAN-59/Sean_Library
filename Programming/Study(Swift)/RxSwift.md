@@ -260,7 +260,7 @@
 </div>
 </details>
 
-## ---
+## ----
 
 ### Traits
 - 전부 Observable이나 좁은 범위의 Observable
