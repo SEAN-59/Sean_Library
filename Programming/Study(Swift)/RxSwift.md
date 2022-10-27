@@ -268,6 +268,7 @@
 
 <details>
 <summary>Traits 종류 별 설명</summary>
+<div markdown="1">
 
 1. single
 - .Success 와 .Error 로 만 구성이 되어있음
@@ -410,12 +411,10 @@ Completable.create { observer -> Disposable in
 // Error: completable
 // disposed
 ```
-
-<div markdown="1">
-
-
 </div>
 </details>
+
+## 
 
 ### Subject
 - 보통의 앱개발에서는 실시간으로 Observable 의 새로운 값을 수동으로 추가하고 Subcribe 에게 방출한다.
