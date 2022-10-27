@@ -58,8 +58,8 @@ import SnapKit
 class SomeClass: ... {
     let disposeBag = DisposeBag()
     public func bind(){...} // Rx코드를 작성할 곳
-    public func attribute(){...} // View를 꾸밀 곳
-    public func layout(){...}
+    public func attribute(){...} 
+    public func layout(){...} // View를 꾸밀 곳 : SnapKit 코드 작성 부 
     init(){
         ... 
         bind()
