@@ -6,11 +6,9 @@
 ### 2. 구성요소
 - Observable
 - Operator
-- Scheduler : 직접 만들어서 사용하는 경우가 많지는 않음
+- Scheduler : 직접 만들어서 사용하는 경우가 많지는 않음 
 
-## 
-
-### Observable
+## Observable
 - 비동기적이며 일정시간 동안 계속해서 이벤트를 생성함
 - Every Observable instance is just a sequence : subscribe 되기 전에는 아무 이벤트도 내보내지 않음
     ##### LifeCycle
@@ -262,9 +260,7 @@
 </div>
 </details>
 
-##
-
-### Traits
+## Traits
 - 전부 Observable이나 좁은 범위의 Observable
   - 그러면 왜 좁은 범위인 Traits 을 쓸까? = 가독성을 높이기에는 최고다
 
@@ -416,9 +412,7 @@ Completable.create { observer -> Disposable in
 </div>
 </details>
 
-## 
-
-### Subject
+## Subject
 - 보통의 앱개발에서는 실시간으로 Observable 의 새로운 값을 수동으로 추가하고 Subcribe 에게 방출한다.
 - 즉, Observable 이면서 Observer 가 필요한건데 이게 바로 Subject 임
     ##### 종류
@@ -531,9 +525,7 @@ Completable.create { observer -> Disposable in
 </div>
 </details>
 
-## 
-
-### Operator
+## Operator
 - RxSwift 에는 많은 Operator 가 존재한다.
 
 <details>
