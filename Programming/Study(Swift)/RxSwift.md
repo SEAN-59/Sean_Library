@@ -1016,6 +1016,9 @@ result
 <summary>4. TimeBased</summary>
 <div markdown="1">
 
+- 과거의 요소들을 subscribe에게 다시 재생하거나 잠시 buffer 를 두고 줄 수 있어서 언제, 어떻게 과거와 새로운 요소들을 전달할건지 컨트롤 할 수 있게 해줌
+과거의 요소들을 replay 하는 방식들이 존재해서 sequence가 item을 방출했을 때 보통 미래의 구독자가 지나간 Item을 받을 수 있는지 아닌지에 대해 전달해 줌
+
 
 </div>
 </details>
