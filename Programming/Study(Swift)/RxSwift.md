@@ -260,6 +260,161 @@
 </div>
 </details>
 
+### Traits
+- 전부 Observable이나 좁은 범위의 Observable
+  - 그러면 왜 좁은 범위인 Traits 을 쓸까? = 가독성을 높이기에는 최고다
+  
+<details>
+<summary>Traits 종류 별 설명</summary>
+
+1. single
+- .Success 와 .Error 로 만 구성이 되어있음
+  1. .Success : .Next와 .Complete를 합친거와 같음
+  2. .Error : error 발생 후 완전히 종료 
+- Subscribe 가 Observable의 Subscribe 와 종류가 다름
+```swift
+Single<String>.just("👍")
+    .subscribe(onSuccess: { print($0) },
+               onFailure: { print("ERROR: \($0)")},
+               onDisposed: { print("disposed")})
+    .disposed(by: disposeBag)
+
+// 👍
+// disposed
+```
+---
+- Observable을 single로 사용 하는 방법
+```swift
+Observable<String>.just("👻")
+    .asSingle()
+    .subscribe(onSuccess: { print($0) },
+               onFailure: { print("ERROR: \($0)") },
+               onDisposed: { print("disposed") })
+    .disposed(by: disposeBag)
+
+// 👻
+// disposed
+```
+----
+- Single은 네크워크 환경에서도 주로 사용을 함
+```swift
+struct SomeJson: Decodable {
+    let name: String
+}
+
+enum JSONError: Error {
+    case decodingError
+}
+
+let json1 = """
+{"name":"Park"}
+"""
+
+let json2 = """
+{"my_name":"two"
+"""
+
+func decode(json: String) -> Single<SomeJson> {
+    Single<SomeJson>.create { observer -> Disposable in
+        guard let data = json.data(using: .utf8),
+              let json = try? JSONDecoder().decode(SomeJson.self, from: data)
+        else {
+            observer(.failure(JSONError.decodingError))
+            return Disposables.create()
+        }
+        observer(.success(json))
+        return Disposables.create()
+    }
+}
+
+decode(json: json1)
+    .subscribe {
+        switch $0 {
+        case .success(let json):
+            print(json.name)
+        case .failure(let error):
+            print(error)
+        }
+    }.disposed(by: disposeBag)
+
+// Park
+```
+
+
+1. maybe
+- Single과 유사함
+- .Success, .Completed, .Error 로 구성
+    1. .Success : = .Success
+    2. .Completed : 아무런 값도 방출하지 않고 그냥 Complete 됨
+    3. .Error : = .error
+```swift
+Maybe<String>.just("🤖")
+    .subscribe(onSuccess: {print($0)},
+               onError: {print($0)},
+               onCompleted: {print("Completed")},
+               onDisposed: {print("disposed")})
+    .disposed(by: disposeBag)
+
+// 🤖
+// disposed
+```
+----
+- Observable을 maybe로 사용하는 방법
+```swift
+Observable<String>.create { observer -> Disposable in
+    observer.onError(TraitsError.maybe)
+    return Disposables.create()
+}.asMaybe()
+    .subscribe(onSuccess: {print("성공: \($0)")},
+               onError: {print("에러: \($0)")},
+               onCompleted: {print("Completed")},
+               onDisposed: {print("disposed")})
+    .disposed(by: disposeBag)
+
+// 에러: maybe
+// disposed
+```
+
+3. completable
+- .Completed, .Error 로 구성
+    1. .Completed : 어떠한 값도 방출하지 않음
+    2. .Error : = .error
+- Single이나 maybe는 앞에 as 명령어를 써서 Observable을 바꿀 수 있지만, Completable은 그런게 읎음
+- Completable은 .create 명령어로 생성함
+- 동기식 연산을 확인하기에 유용하게 쓰일 수 있음
+
+```swift
+Completable.create { observer -> Disposable in
+    observer(.completed)
+    return Disposables.create()
+}.subscribe(onCompleted: {print("Completed")},
+            onError: {print("Error: \($0)")},
+            onDisposed: {print("disposed")})
+.disposed(by: disposeBag)
+
+// Completed
+// disposed
+```
+----
+```swift
+Completable.create { observer -> Disposable in
+    observer(.error(TraitsError.completable))
+    return Disposables.create()
+}.subscribe(onCompleted: {print("Completed")},
+            onError: {print("Error: \($0)")},
+            onDisposed: {print("disposed")})
+.disposed(by: disposeBag)
+
+// Error: completable
+// disposed
+```
+
+<div markdown="1">
+
+
+</div>
+</details>
+
 ### Subject
 - 보통의 앱개발에서는 실시간으로 Observable 의 새로운 값을 수동으로 추가하고 Subcribe 에게 방출한다.
 - 즉, Observable 이면서 Observer 가 필요한건데 이게 바로 Subject 임
