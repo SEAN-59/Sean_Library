@@ -341,7 +341,7 @@ decode(json: json1)
 ```
 
 
-1. maybe
+2. maybe
 - Single과 유사함
 - .Success, .Completed, .Error 로 구성
     1. .Success : = .Success
