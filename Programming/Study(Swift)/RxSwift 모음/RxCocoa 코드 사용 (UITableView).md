@@ -436,8 +436,7 @@ extension Reactive where Base: UITableView {
 
 </div>
 </details>
-
-<br>
+----
 
 ### 구현부
 
