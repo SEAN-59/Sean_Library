@@ -49,9 +49,7 @@
     ```
     
 3. From : array 형태의 요소만 받는 명령어
-    <details>
-    <summary>코드</summary>
-    <div markdown="1">
+
     ```swift
     Observable.from([1,2,3]) 
     .subscribe(onNext:{
@@ -61,8 +59,7 @@
     // 2
     // 3
     ```
-    <div>
-    </details>
+
 4. Subscribe : 어떤 명령어를 사용을 하던 구독을 하지 않으면 그 값을 보여주지 않음
     - onNext 와 같은 내부 파라미터를 선언하지 않으면 과정을 보여주게 됨
     ```swift

@@ -510,6 +510,7 @@ bind() {
 
 1. itemSelected : cell 선택시
 
+
 ```swift
 public var itemSelected: ControlEvent<IndexPath> {
     let source = self.delegate.methodInvoked(#selector(UITableViewDelegate.tableView(_:didSelectRowAt:)))
@@ -520,3 +521,114 @@ public var itemSelected: ControlEvent<IndexPath> {
     return ControlEvent(events: source)
 }
 ```
+
+- 설명은 위와 같이 되어있으나 해당 코드의 사용은 쉽다.
+
+```swift
+tableView.rx.itemSelected
+    .subscribe(onNext: { indexPath in
+        print("select \(indexPath.row)")
+    }).disposed(by: disposeBag)
+``` 
+
+- 해당 코드의 경우 해당 셀을 누르게 되면 그 즉시 해당 셀의 셀렉을 푸는 동작을 수행한다 
+- itemSelected 같은 경우에는 Delegate의 didSelectRowAt 함수와 같은 동작을 한다.
+
+2. itemDeselected : Cell의 select 해제시 
+
+```swift
+public var itemDeselected: ControlEvent<IndexPath> {
+    let source = self.delegate.methodInvoked(#selector(UITableViewDelegate.tableView(_:didDeselectRowAt:)))
+        .map { a in
+            return try castOrThrow(IndexPath.self, a[1])
+        }
+        return ControlEvent(events: source)
+}
+```
+
+```swift
+tableView.rx.itemDeselected
+    .subscribe(onNext:  { indexPath in
+        print("deselect \(indexPath.row)")
+    }).disposed(by: disposeBag)
+```
+
+- Delegate 의 didDeselectRowAtIndexPath 함수와 같은 동작을 수행하며 해당 셀의 선택이 풀릴 경우에 동작한다.
+
+3. itemUnhighlighted : Delegate의 didUnhighlightRowAt 함수와 같은 역할을 한다.
+4. itemAccessoryButtonTapped : Delegate의 accessoryButtonTapped 와 같은 동작
+5. itemInserted : Delegate의 commitEditingStyle 
+6. itemDeleted : Delegate의 commitEditingStyle
+7. itemMoved : Delegate의 moveRowAtIndexPath
+8. willDisplayCell : Delegate의 willDisplayCell
+9. didEndDisplayingCell : Delegate의 didEndDisplayingCell
+
+- 9번까지는 1,2 번과 방식이 거의 다 똑같고 문서에서도 딱히 특별한 내용이 적힌게 없어서 어떠한 Delegate의 함수와 같은 동작을 하는지만 적어두겠다.
+
+10. modelSelected : itemSelected 랑 같은 기능을 수행하는데 방출되는게 model? 이라 해야하나 타입이라 해야하나 조금 다른걸 내보낼 수 있음
+```swift
+public func modelSelected<T>(_ modelType: T.Type) -> ControlEvent<T> {
+        let source: Observable<T> = self.itemSelected.flatMap { [weak view = self.base as UITableView] indexPath -> Observable<T> in
+            guard let view = view else {
+                return Observable.empty()
+            }
+            return Observable.just(try view.rx.model(at: indexPath))
+        }   
+        return ControlEvent(events: source)
+    }
+```
+```swift
+tableView.rx.modelSelected(MyModel.self)
+    .map { ... 
+```
+- 공식에는 이런식으로 되어있어서 참고해서 쓰면 될것 같은데 아직 이 함수를 어떻게 써야 하고 저 모델 타입에는 어떠한 타입을 만들어 넣어야 되는지 파악을 못함 (이해 했음)
+
+```swift
+ tableView.rx.modelSelected(Member.self)
+    .subscribe(onNext: { member in
+        print("\(member) good")
+    }).disposed(by:disposeBag)
+```
+- 이 녀석은 위의 코드만 보면 딱 바로 이게 어떻게 뭘 참조하는건지 안 들어 올 수 있는데 (나는 그랬음) 일단 tableView의 model 에 대해서 알 필요가 있음
+
+```swift
+struct Member {
+    var item1: String
+    var item2: String
+}
+
+final class D_DayViewModel {
+    
+    private var itemArray: [Member]
+    
+    init(itemArray: [Member]) {
+        self.itemArray = itemArray
+    }
+    
+    func getCellData() -> Observable<[Member]> {
+        return Observable.of(itemArray)
+    }
+}
+```
+
+- 이런식으로 구성이 되어 있고 tableView는 getCellData() 로 리턴 되는 Observable로 만들어지기에 저기에 들어가는 타입이 modelSelected 에서 Type.self 에 들어가는 타입이 될거임
+- 이게 맞지 않으면 아무리 값이 멀쩡하게 있어도 나중에 Fatal error: Failure converting from Optional() to () 라면서 Fatal error가 뜨게 되니까 해당 함수를 사용하게 될때는 타입 잘 맞출것
+- 얘는 itemSelected 와 다른 점으로는 해당 셀에 있는 값들을 불러 올 수 있다는게 정말 큰 장점이라 생각한다.
+
+11. modelDeselected : itemDeselected 
+12. modelDeleted : itemDeleted
+
+13. model : 이건 뭐에 어떻게 쓰는건지 모르겠음
+- 주석 처리 된거 해석해보면 indexPath에서 모델을 검색하는 방법이라는거 같으니 indexPath 를 이용해서 해당 셀의 data를 시스템상으로 알 수 있게 해주는게 아닐까 함
+- 조금 더 검색과 사용 방법에 대해서 공부를 해봐야 할 것 같음
+
+- 여기 부턴 조금 심화과정 같은 느낌
+- prefetchDataSource 이거 이상 쓸일이 생기면 여기를 보면 될듯 함
+- view 에 보여지기 전 셀에서 처리해야 할 연산이 길어 미리 진행 할 수 있게 해주는 DataSource = 해당 경우가 아니면 잘 사용되지 않는다고 하니 필요로 하게 되거나 해당 내용이 쓰인 다른 코드를 보게 되면 확인을 하는게 좋을 듯 함
+
+14. prefetchDataSource
+15. setPrefetchDataSource
+16. prefetchRows
+17. cancelPrefetchingForRows
+
+18. didUpdateFocusInContextWithAnimationCoordinator
