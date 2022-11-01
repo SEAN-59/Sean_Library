@@ -179,3 +179,4 @@ extension Reactive where Base: UIControl {
     ```
 
 - 근데 이게 코드를 그닥 볼 필요를 못 느끼겠는게 그냥 .Event 할 때 이거 사용하는 정도로만 보면 될듯 함
+- Rx+OOO 이거에서 개인적으로 따로 빠진거 없이 동작이 들어가야 할 때는 이거 쓰는 듯 함
