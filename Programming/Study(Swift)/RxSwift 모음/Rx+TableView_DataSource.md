@@ -14,101 +14,7 @@
 <div markdown="1">
 
 ```swift
-
-#if os(iOS) || os(tvOS)
-
-import UIKit
-import RxSwift
-
-// objc monkey business
-class _RxTableViewReactiveArrayDataSource
-    : NSObject
-    , UITableViewDataSource {
-    
-    func numberOfSections(in tableView: UITableView) -> Int {
-        1
-    }
-   
-    func _tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        0
-    }
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        _tableView(tableView, numberOfRowsInSection: section)
-    }
-
-    fileprivate func _tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        rxAbstractMethod()
-    }
-
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        _tableView(tableView, cellForRowAt: indexPath)
-    }
-}
-
-
-class RxTableViewReactiveArrayDataSourceSequenceWrapper<Sequence: Swift.Sequence>
-    : RxTableViewReactiveArrayDataSource<Sequence.Element>
-    , RxTableViewDataSourceType {
-    typealias Element = Sequence
-
-    override init(cellFactory: @escaping CellFactory) {
-        super.init(cellFactory: cellFactory)
-    }
-
-    func tableView(_ tableView: UITableView, observedEvent: Event<Sequence>) {
-        Binder(self) { tableViewDataSource, sectionModels in
-            let sections = Array(sectionModels)
-            tableViewDataSource.tableView(tableView, observedElements: sections)
-        }.on(observedEvent)
-    }
-}
-
-// Please take a look at `DelegateProxyType.swift`
-class RxTableViewReactiveArrayDataSource<Element>
-    : _RxTableViewReactiveArrayDataSource
-    , SectionedViewDataSourceType {
-    typealias CellFactory = (UITableView, Int, Element) -> UITableViewCell
-    
-    var itemModels: [Element]?
-    
-    func modelAtIndex(_ index: Int) -> Element? {
-        itemModels?[index]
-    }
-
-    func model(at indexPath: IndexPath) throws -> Any {
-        precondition(indexPath.section == 0)
-        guard let item = itemModels?[indexPath.item] else {
-            throw RxCocoaError.itemsNotYetBound(object: self)
-        }
-        return item
-    }
-
-    let cellFactory: CellFactory
-    
-    init(cellFactory: @escaping CellFactory) {
-        self.cellFactory = cellFactory
-    }
-    
-    override func _tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        itemModels?.count ?? 0
-    }
-    
-    override func _tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        cellFactory(tableView, indexPath.item, itemModels![indexPath.row])
-    }
-    
-    // reactive
-    
-    func tableView(_ tableView: UITableView, observedElements: [Element]) {
-        self.itemModels = observedElements
-        
-        tableView.reloadData()
-    }
-}
-
-#endif
-
+    나는 이게 RxCocoa 안에 들어있는 소스 인줄 알았는데 RxDataSources 를 따로 Import 해줘야 함
 ```
 
 </div>
@@ -130,7 +36,142 @@ class RxTableViewReactiveArrayDataSource<Element>
     2. protocol : SectionModelType = 여러 Section 에 대해 데이터 설정할 수 있음
     3. class : DataSource = Section 에 대한 설정, animation 적용할 수 있음
 
-### 사용법 
-1. 사용을 할 dataSource를 미리 정의
-2. 사용할 section 도 정의
-3. dataSource 에 대한 기타 메소드도 구현 가능(선택)
+### Model 정의
+- DataSource 에서 사용되는 데이터 형은 AnimatableSectionModelType 를 준수해야 함
+    ```swift
+    public protocol AnimatableSectionModelType
+        : SectionModelType
+        , IdentifiableType where Item: IdentifiableType, Item: Equatable {
+    }
+    ```
+
+- AnimatableSectionModelType 은 SectionModelType 를 준수하는 Protocol 이다
+    ```swift
+    public protocol SectionModelType {
+        associatedtype Item
+
+        var items: [Item] { get }
+
+        init(original: Self, items: [Item])
+    }
+    ```
+    - original 에 해당하는 Model 은 Section 에 해당
+    - items 에 해당되는 인수는 rows 값
+
+- AnimatableSectionModelType 에 준수하는 모델을 정의하기 전에 [Item] 타입에 들어갈 row 모델부터 정의
+    - Item 은 IdentifiableType 과 Equatable 을 준수해야 함
+    ```swift
+    struct MyModel {
+        var message: String
+        var isDone: Bool = false
+    }
+
+    extension MyModel: IdentifiableType, Equatable {
+        var identity: String { return UUID().uuidString }
+            // 실제로는 데이터를 구분하는 id 사용 할것
+    }
+
+    struct MySection {
+        var headerTitle: String
+        var items: [Item]
+    }
+
+    extension MySection: AnimatableSectionModelType {
+        typealias Item = MyModel
+        
+        var identity: String { return headerTitle }
+        
+        init(original: MySection, items: [MyModel]) {
+            self = original
+            self.items = items
+        }
+    }
+    ```
+
+### RxTableViewSectionReloadDataSource 구현
+1. VC 준비
+    - UI Components 배치
+
+2. 데이터 준비
+    - Model 코드 작성
+
+3. RxTableViewSectionReloadDataSource 를 구현하기
+    - 어느 변수에 해당 클래스를 구현하기
+    - 해당 변수에 들어가는 코드는 row 데이터가 적용이 됨
+    ```swift
+    var dataSource = RxTableViewSectionReloadDataSource<MySection> { dataSource, tableView, indexPath, item in
+        let cell = tableView.dequeueReusableCell(withIdentifier: tableViewCell.reuseIdentifier, for: indexPath) as! tableViewCell
+        // cell 의 초기화 선언 부
+        return cell
+    }
+    ```
+    - 위 코드로 틀을 만들어고 주석 처리 부분에 내용을 집어 넣는것임, 구성 원본은 밑에 따로 작성하겠음
+
+4. section 데이터는 dataSource.titleForHeaderInSection 으로 따로 설정을 해줘야 함
+    ```swift
+    public typealias TitleForHeaderInSection = (TableViewSectionedDataSource<Section>, Int) -> String?
+    ```
+    - 이렇게 코드를 구성을 해야 되는데 TableViewSectionedDataSource<Section> 이부분은 3번에서 만든 부분이기에 해당 부분을 넣어주면 되고 Int 의 값은 index 정도로 생각하면 될 듯 함
+
+5. 이제 TableView 에 Cell 을 등록
+    ```swift
+    tableView.rx.register(tableViewCell.self, forCellReuseIdentifier: TableViewCell.reuseIdentifier)
+    ```
+
+6.  TableView 에 delegate 할당
+    ```swift
+    tableView.rx.setDelegate(self)
+        .disposed(by: disposeBag)
+    ```
+
+7. BehaviorRelay 를 만들기
+    ```swift
+    var sectionRelay = BehaviorRelay(value: [MySection]())
+    ```
+    - 왜, BehaviorRelay 를 썼나?
+        1. Relay 는 RxCocoa 의 클래스 (Subject 는 RxSwift 의 클래스)
+        2. Relay 는 .completed, .error 를 발생시키지 않고 Dispose 되기 전까지 계속 동작하기에 UI 작업 용이함 (Subject 는 해당 이벤트가 발생하면 그 즉시 종료 됨)
+        3. Behavior 는 초기값을 가지게 할 수 있고 값을 발행받기 전이라면 초기 값을 사용하기에 초기값이 없는 Publish 는 구독을 한 뒤 발생하는 값들에 반응을 하기에 데이터가 이미 있는 UI를 처음에 만들때는 문제가 있다고 생각했고 데이터가 없더라도 Behavior 의 초기값을 비워두면 되는것이다.
+
+8. 7 에서 만든 Relay 에 초기값 입력
+    ```swift
+    sectionRelay.accept(initData)
+    ```
+
+9. 8 까지 마친 Relay 를 이용해서 TableView 에 데이터 소스 맵핑
+    ```swift
+    sectionRelay
+        .bind(to: tableView.rx.items(dataSource: dataSource))
+        .disposed(by: disposeBag)
+    ```
+
+
+### code 로 따져보자
+
+1. RxTableViewSectionReloadDataSource.swift
+    ```swift
+    open class RxTableViewSectionedReloadDataSource<Section: SectionModelType>
+        : TableViewSectionedDataSource<Section>
+        , RxTableViewDataSourceType {
+        public typealias Element = [Section]
+
+        open func tableView(_ tableView: UITableView, observedEvent: Event<Element>) {
+            Binder(self) { dataSource, element in
+                #if DEBUG
+                    dataSource._dataSourceBound = true
+                #endif
+                dataSource.setSections(element)
+                tableView.reloadData()
+            }.on(observedEvent)
+        }
+    }
+    ```
+
+| 이름 | 라이브러리 | 위치 |
+|:-:|:-:|:-:|
+| SectionModelType |  | |
+| TableViewSectionDataSource | RxDataSources | Sources > RxDataSources |
+| RxTableViewDataSourceType | RxSwift | RxCocoa > iOS > Protocols |
+| 
+
+2. 

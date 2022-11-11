@@ -632,3 +632,20 @@ final class D_DayViewModel {
 17. cancelPrefetchingForRows
 
 18. didUpdateFocusInContextWithAnimationCoordinator
+
+----
+
+### 구현시 주의 사항
+
+- 이렇게 열심히 써봤자 reuseIdentifier 쪽 에러 날텐데 register 꼭해줘야 하는거임
+    ```swift
+        ~~~.bind(to: tableView.rx.items(...)){ row, element, cell in
+            ....
+        }.disposed(by: disposeBag)
+    ```
+
+- 아래 코드를 등록 무조건 해줘야 함, 높이도 정해줘야 함
+    ```swift
+        self.setTableView.register(TableViewCell.self, forCellReuseIdentifier: TableViewCell.reuseIdentifier)
+        self.setTableView.rowHeight = 각 셀 높이
+    ```
