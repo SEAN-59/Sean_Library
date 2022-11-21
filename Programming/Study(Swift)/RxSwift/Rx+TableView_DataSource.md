@@ -69,6 +69,8 @@
     extension MyModel: IdentifiableType, Equatable {
         var identity: String { return UUID().uuidString }
             // 실제로는 데이터를 구분하는 id 사용 할것
+            // 해당 코드의 경우 호출시점마다 identity가 바뀌는 문제가 있음
+            // 만약 같은 셀을 데이터로 넣었을 때, 하나의 셀만 표현하고 싶은 경우 id 값을 얻어 넣어서 중복 구분하는 식으로 구분이 가능할거임 
     }
 
     struct MySection {
@@ -145,8 +147,11 @@
         .disposed(by: disposeBag)
     ```
 
+10. delegate 를 할당했기에 UITableViewDelegate Protocol 을 이용한 함수들을 사용할 수 있음
+    - heightForRowAt 이라던가 여러가지 쓸 수 있음
 
-### code 로 따져보자
+
+### 주요한 내용들에 대해서 code 를 한 번 봐보자
 
 1. RxTableViewSectionReloadDataSource.swift
     ```swift
@@ -166,12 +171,37 @@
         }
     }
     ```
+    - 클로저에서 사용한 인자들
+        1. dataSource = TableViewSectionedDataSource<Section>
+        2. tableView = UITableView
+        3. indexPath = IndexPath
+        4. item = Section.내부 
+            - 이건 몇몇 테스트를 조금 더 해볼 필요가 있겠음
 
-| 이름 | 라이브러리 | 위치 |
-|:-:|:-:|:-:|
-| SectionModelType |  | |
-| TableViewSectionDataSource | RxDataSources | Sources > RxDataSources |
-| RxTableViewDataSourceType | RxSwift | RxCocoa > iOS > Protocols |
-| 
-
-2. 
+2. UITableView+RX.swift > func items<dataSource: ...> -> ...
+    ```swift
+    public func items<
+            DataSource: RxTableViewDataSourceType & UITableViewDataSource,
+            Source: ObservableType>
+        (dataSource: DataSource)
+        -> (_ source: Source)
+        -> Disposable
+        where DataSource.Element == Source.Element {
+        return { source in
+            // This is called for side effects only, and to make sure delegate proxy is in place when
+            // data source is being bound.
+            // This is needed because theoretically the data source subscription itself might
+            // call `self.rx.delegate`. If that happens, it might cause weird side effects since
+            // setting data source will set delegate, and UITableView might get into a weird state.
+            // Therefore it's better to set delegate proxy first, just to be sure.
+            _ = self.delegate
+            // Strong reference is needed because data source is in use until result subscription is disposed
+            return source.subscribeProxyDataSource(ofObject: self.base, dataSource: dataSource as UITableViewDataSource, retainDataSource: true) { [weak tableView = self.base] (_: RxTableViewDataSourceProxy, event) -> Void in
+                guard let tableView = tableView else {
+                    return
+                }
+                dataSource.tableView(tableView, observedEvent: event)
+            }
+        }
+    }
+    ```
