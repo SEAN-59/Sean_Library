@@ -25,7 +25,7 @@
     Observable<Int>.just(1)
         .subscribe(onNext: {
             print($0)
-        })
+        })이
         // 1
     ```
 

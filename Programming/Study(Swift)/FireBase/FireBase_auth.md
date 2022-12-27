@@ -72,8 +72,7 @@ Reference : [Authentication 공식 문서](https://developers.google.com/identit
 
 4. 프로필 정보 가져오기
     - signIn 함수에서 user.profile?. 키워드를 사용해서 정보를 가져올 수 있음
-   
-
+    
 5. 백엔드 서버 인증
     - 로그인한 사용자의 ID를 백엔드 서버에 전달하려면 사용자의 프로필 정보 (이메일 주소 포함) 또는 GIDGoogleUser의 userId 필드를 사용하지 마세요. 대신 서버에서 안전하게 검증할 수 있는 ID 토큰을 전송합니다.
     - signIn 에서 다음과 같은 코드를 활용함
