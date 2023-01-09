@@ -452,11 +452,11 @@ int number;
     } today = {1,8,2022};
 
     date *datePt;
-    date = &today;
+    datePt = &today;
 
-    (*date).day = 9;
+    (*datePt).day = 9;
 
-    date->day = 2023;
+    datePt->day = 2023;
     ```
     - 구조체 포인터 연산자를 사용하지 않으면 ()감싸고 내부에 *도 넣어주면서 사용해야 하지만 구조체 포인터 연산자를 사용하게 되면 조금 더 깔끔해진것을 볼 수 있다.
 
