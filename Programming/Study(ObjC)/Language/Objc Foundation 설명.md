@@ -1,6 +1,7 @@
 # Objc Foundation 설명
 
 ## 1. NSNumber
+### [Numbers, Data, Basic Values정리](Foundation_(Number,Data,BasicValues).md)
 - 기본 데이터 형들은 객체가 아니었고 메시지를 보내는 일은 불가능 했다.   
 하지만 그럼에도 이러한 형 값을 객체로 다루어야 할 때가 있다.
 - 예를 들어 NSArray 는 값을 저장할 수 있는 배열을 생성해주는데 이 값은 객체여야 한다.   
@@ -11,7 +12,8 @@
     ```
     - 관련 메서드는 공식 문서 참고
 
-## 2. NSString = 문자 스트링 객체를 다룰 수 있음
+## 2. NSString = 문자 스트링 객체를 다룰 수 있다.
+### [NSString Method 정리](Foundation_(Strings and Text).md)
 - 기본 C 의 문자는 char 형이지만 NSString 의 경우에는 unichar 형으로 이루어져 있음
 - %@ 포맷문자를 이용해서 NSLog 에 띄울 수 있는데 이는 이 객체 뿐 아니라 다른 객체 표시도 가능하다.
     ```objectivec
@@ -45,3 +47,6 @@
 
 ## 8. NSData
 - https://developer.apple.com/documentation/foundation/nsdata?language=objc
+
+
+
