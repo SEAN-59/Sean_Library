@@ -10,6 +10,6 @@ dispatch_asnyc(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT,0), ^ {
 
     dispatch_asnyc(dispatch_get_main_queue(), ^ {
         // 이 블럭은 메인쓰레드에서 실행된다.
-    })
-})
+    });
+});
 ```obcd
