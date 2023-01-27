@@ -12,4 +12,11 @@ dispatch_asnyc(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT,0), ^ {
         // 이 블럭은 메인쓰레드에서 실행된다.
     });
 });
-```obcd
+```
+
+### 동기 처리 방법
+```objectivec
+dispatch_queue_t queue = dispatch_queue_create("queue_NAME",NULL);
+// 매개변수로 큐의 이름과, 큐의 속성 집합을 받음
+
+```ob
