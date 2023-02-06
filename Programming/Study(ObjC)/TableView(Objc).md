@@ -37,6 +37,7 @@
 ## xib 파일을 활용한 tableView 만드는 방법
 
 ### 1. 화면 배치 및 tableView와 cell 에 Identity 값 제대로 넣어두기
+
 ### 2. 사용할 tableView를 outlet 변수 지정과 프로토콜(datasource, delegate) 등록하기
 ```objectivec
     [self.tableView setDelegate:self];
@@ -46,7 +47,7 @@
 ```objectivec
     UINib *nib = [UINib nibWithNibName:cellIdentity
                         bundle:nil];
-    [_tableView registerNib:nib                            
+    [self.tableView registerNib:nib                            
                 forCellReuseIdentifier:cellIdentity];
 ```
 
